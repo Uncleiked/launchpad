@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useMemo } from "react"
 import { trendingIdeas, categories } from "@/lib/data"
 import { ChevronUp, MessageSquare, TrendingUp, Flame } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
@@ -20,6 +21,21 @@ const rankColors: Record<number, string> = {
 }
 
 export default function TrendingPage() {
+  const [selectedCategory, setSelectedCategory] = useState("all")
+  const [time, setTime] = useState("today")
+
+  const filteredTrendingIdeas = useMemo(() => {
+    let result = trendingIdeas
+    if (selectedCategory !== "all") {
+      result = result.filter(idea => idea.category === selectedCategory)
+    }
+
+    // Since we don't have real dates in mock data, 'time' filter is just for show right now,
+    // in a real backend this would pass the ?time=today parameter. 
+    // We'll just return the filtered array by category.
+    return result
+  }, [selectedCategory, time])
+
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-6 lg:px-8 lg:py-8">
       <div className="flex items-center gap-2">
@@ -33,7 +49,7 @@ export default function TrendingPage() {
       </p>
 
       <div className="mt-4 flex flex-wrap gap-3">
-        <Select defaultValue="today">
+        <Select value={time} onValueChange={setTime}>
           <SelectTrigger className="w-32">
             <SelectValue placeholder="Time" />
           </SelectTrigger>
@@ -44,7 +60,7 @@ export default function TrendingPage() {
           </SelectContent>
         </Select>
 
-        <Select defaultValue="all">
+        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
           <SelectTrigger className="w-40">
             <SelectValue placeholder="All Categories" />
           </SelectTrigger>
@@ -60,7 +76,7 @@ export default function TrendingPage() {
       </div>
 
       <div className="mt-6 flex flex-col gap-4">
-        {trendingIdeas.map((idea) => (
+        {filteredTrendingIdeas.map((idea) => (
           <Link
             key={idea.id}
             href={`/ideas/${idea.id}`}
@@ -120,6 +136,11 @@ export default function TrendingPage() {
             </div>
           </Link>
         ))}
+        {filteredTrendingIdeas.length === 0 && (
+          <div className="text-center py-12 text-muted-foreground">
+            No trending ideas found for this category.
+          </div>
+        )}
       </div>
     </div>
   )

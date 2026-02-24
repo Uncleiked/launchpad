@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 
+import { useRouter } from "next/navigation"
+
 function LaunchpadLogoLarge() {
   return (
     <div className="flex size-16 items-center justify-center rounded-2xl bg-primary" aria-hidden="true">
@@ -31,6 +33,14 @@ function LaunchpadLogoLarge() {
 }
 
 export default function SignUpPage() {
+  const router = useRouter()
+
+  const handleSignUp = (e: React.FormEvent) => {
+    e.preventDefault()
+    // Simulated auth flow
+    router.push("/my-ideas")
+  }
+
   return (
     <div className="w-full max-w-sm">
       <div className="mb-8 flex flex-col items-center text-center">
@@ -45,7 +55,7 @@ export default function SignUpPage() {
 
       <div className="rounded-xl border border-border bg-card p-6">
         <form
-          onSubmit={(e) => e.preventDefault()}
+          onSubmit={handleSignUp}
           className="flex flex-col gap-5"
         >
           <div className="flex flex-col gap-1.5">
