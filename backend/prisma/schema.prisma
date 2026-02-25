@@ -1,19 +1,17 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-  id           String    @id @default(uuid())
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
   name         String
   email        String    @unique
   passwordHash String
@@ -24,7 +22,7 @@ model User {
 }
 
 model Category {
-  id          String   @id @default(uuid())
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
   name        String   @unique
   description String?
   color       String?  // Optional color code if needed for badges
@@ -32,7 +30,7 @@ model Category {
 }
 
 model Idea {
-  id               String    @id @default(uuid())
+  id               String    @id @default(auto()) @map("_id") @db.ObjectId
   title            String
   shortDescription String
   fullDescription  String
@@ -41,10 +39,10 @@ model Idea {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  authorId         String
+  authorId         String    @db.ObjectId
   author           User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
   
-  categoryId       String
+  categoryId       String    @db.ObjectId
   category         Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   comments         Comment[]
@@ -52,23 +50,25 @@ model Idea {
 }
 
 model Comment {
-  id        String   @id @default(uuid())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   content   String
   createdAt DateTime @default(now())
   
-  authorId  String
+  authorId  String   @db.ObjectId
   author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   
-  ideaId    String
+  ideaId    String   @db.ObjectId
   idea      Idea     @relation(fields: [ideaId], references: [id], onDelete: Cascade)
 }
 
 model Upvote {
-  userId String
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  ideaId String
+  ideaId String @db.ObjectId
   idea   Idea   @relation(fields: [ideaId], references: [id], onDelete: Cascade)
 
-  @@id([userId, ideaId])
+  // Compound unique constraint instead of compound ID for MongoDB
+  @@unique([userId, ideaId])
 }
